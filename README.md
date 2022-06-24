@@ -1,21 +1,33 @@
 # AWS DEVELOPER
 
-## AIM
+## AWS Console
 
-Root account: Cuentra raiz
-User: Personas dentro de la organización
-Groups: Grupo que solo contienen personas
+### AWS has global Services
+- Identity and Access Managments (IAM)
+- Route53 (DNS Service)
+- CloudFront (Content Delivery Network - CDN)
+- WAF (Web Applications Firewall)
 
+### Most AWS Services are Region-scoped
+- Amazon EC2 (Infrastructure as a service)
+- Elastic Beanstalk (Platform as a service)
+- Lambda (Function as a Service)
+- Rekognition (Software as a Service)
 
-### Permisos
+## IAM: Identity and Access Managments
 
-Policies: Se asignan mediante documentos JSON.
-
-Los permisos se asignan a grupos o a usuario directos (inline policy)
+IAM: Identity and Access Managments (Global)
+Root account: Created by default
+User: People within your organization, and can be grouped
+Groups: Only contain users, other groups
 
 Login: https://huallpa-nestor-aws.signin.aws.amazon.com/console
 
-Ejemplo: arn:aws:iam::aws:policy/IAMReadOnlyAccess
+
+### Permissions
+
+Policies: These are JSON Documents. Define the permissions of the users
+Example: arn:aws:iam::aws:policy/IAMReadOnlyAccess
 
 ```JSON
 {
@@ -37,9 +49,9 @@ Ejemplo: arn:aws:iam::aws:policy/IAMReadOnlyAccess
     ]
 }
 ```
-Es posible crear Policies personalizadas.
+You can create custom policies.
 
-#### IAM Policies
+### IAM Policies
 
 Consists of 
 - Version: policy language version, always include “2012-10-17”
@@ -55,24 +67,43 @@ Consists of
 (optional)
 
 
+### IAM Password Policy
+- Strong password = higher security for your account
+- In AWS, you can setup a password Policy
+  - Minumum password length
+  - including uppercase, lowercase letters, numbers, non-alphanumeric character.
+- Allow all IAM Users to change their own passwords
+- Require users to change their password after some time
+- Prevent password re-user
 
+### Multifactor authentication - MFA
 
-### IAM para servicios
+Login = Password + MFA 
 
-Se pueden asignar permisos a AWS services con IAM Roles. Los roles mas comunes son:
+### AWS CLI command hands on 
+
+```
+aws configure
+```
+
+### IAM for services
+
+We can assign roles to services using IAM Role
 - EC2 Instance Role
 - Lambda Function Role
 - Role for CloudFormation
 
 ### Herramientas de seguridad
 
-- IAM Credential Report (nivel de cuenta)
-- IAM Access Advisor (nivel de usuario)
-    - Muestra los permisos de los usuario y cuando fue la ultima vez que lo uso.
+- IAM Credential Report (account-level)
+- IAM Access Advisor (user-level)
+    - It shows the service permissions granted to a user and when those services were last accessed.
+    - You can use this information to revise your policies
 
-### Mejores Practicas
-- Dont use the root user account
-- 1 to 1 physical user to AwsUser
+
+### Best Practicies
+- Don't use the root user account
+- One to one physical user to AwsUser
 - Assing users group and assign permitions to groups
 - Create strong password policy
 - Use of Multi Factor Authentication MFA
@@ -83,57 +114,103 @@ Se pueden asignar permisos a AWS services con IAM Roles. Los roles mas comunes s
 
 
 ### EC2: Elastic Computing Cloud
-- Capacidades
-    - Renta de EC2
-    - Resguardar datos en EBS
-    - Balanceador de carga con ELB
-    - Servicio de autoescalado con ASG
-- Opciones de configuración 
-    - Sistema operativo
-    - CPU y nucleos
-    - Cantidad de memoria ram
-    - Espacio de almacenamiento
-    - Tarjeta de Red
-    - Reglas de Firewall
-    - Script de arranque y EC2 Data Script (Bootraping)
-        - Instalar software, updates, downloading commons file.
-        - Se necesita permisos de root para ejecutar el EC2 Data Script.
+- Capabilities
+    - Rent EC2
+    - Storage EBS
+    - Load balancing ELB
+    - Autoscaling ASG
+- Configuration options
+    - Operating sistem
+    - CPU y core
+    - Random access memory
+    - Storage space
+    - Network card
+    - Firewall rule
+    - boostrap Script: EC2 Data Script (Bootraping)
+        - Install software, updates, downloading commons file.
+        - It needs permisition
 
-- Tipos de Insatancia: https://aws.amazon.com/es/ec2/instance-types/
-    - Nomenclatura: m5.2xlarge
+
+![](images/ec2-instance-type.png)
+
+``` bash
+#!/bin/bash
+yum update -y
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
+```
+
+Note: Th private Ipv4 address doesn't change when a EC2 is stopped but public ip so does.
+
+- EC2 Instance Type: https://aws.amazon.com/es/ec2/instance-types/
+    - Structure: m5.2xlarge
         - m: instance class
         - 5: generation
-        - 2xlarge: tamaño dentro de la clase
+        - 2xlarge: size within the instance class 
     - General Purpose
+        - For Web servers or code repository
         - Balance between compute, memory, Networking
         - t2.micro
     - Compute Optimazed. Great for compute intensive task
-        - Procesamiento Batch
+        - Procesesing  Batch
         - Media Transcoding
         - High performance web server
         - High performance computing (HPC)
-        - Servidores de dedicados de Juegos
+        - Game servers
         - Scientific modeling & ML
         - C6g, C6gn, C5, C5a, C5n, C4
-    - Memory Optimazied: Para procesamiento de grande volumenes en memoria.
+    - Memory Optimazied: Process large data sets in memory 
         - High perfomance en Base de datos relacional y no relacional.
         - In-Memory base de datos para BI
-        - Aplicaciones en tiempo real.
+        - Application Real time
         - R6g, R5, R5a, R5b, R5n, Ra, X1e, X1, high memory, z1d
-    - Almacenamiento optimizado.
+    - Storage optimized.
         - High frecuency online transaction processing (OLTP)
-        - Base de datos relacional y no relacional.
+        - Relational & NoSQL databases
         - Data wherehousing application
         - File sytem distribuido.
         - l3, l3en, D2, D3, D3en, H1
     - https://instances.vantage.sh/
 
 - Security Groups
-    - Actua como "firewall" de instancias EC2
-    - Actividades regulares
-        - Acceso a puertos
-        - Autorización de rangos de ips
-        - Control de trafico entrante (bloqueado por default) y saliente(habilitado por default)
+  - They control how traffic is allowed into or out of our EC2 instances
+  - Security groups only contain *allow* rules
+  - Security groups rules can reference by IP or by security group
+
+![](images/security-group.png)
+
+- They regulate:
+  - Access to Ports
+  - Authorised IP ranges - IPv4 and IPv6
+  - Control of inbound network
+  - Control of outbound network
+
+
+![](images/security-group-diagram.png)
+
+
+- **Good to know**
+  - Can be attached to multiple instances
+  - Locked down to a region /VPC combination
+  - Does live "outside" the EC2 - if traffic is blocked the EC2 instances won't see it.
+  - _It's good to maintain one separate secutiry group for SSH access_
+  - If your application is not accessible (time out), then it's a security group issue
+  - If your application gives a "connection refused" error, then it's an application error or it's not launched.
+  - All inbound traffic is **blocked** by default
+  - All outbound traffic is **authorised** by default
+
+- Important port
+  - 22 = SSH (Secure Shell) - Log into linux instance
+  - 21 = FTP (file transfer protocol) - upload files into a file share
+  - 22 = SFTP
+  - 80 = HTTP
+  - 443 = HTTPS
+  - 3389 = RDP
+
+![](images/security-group-refering.png)
+
 
 - SSH
 ssh -i EC2Tutotial.pem ec2-user@35.180.140.144
