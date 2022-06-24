@@ -211,9 +211,9 @@ Note: Th private Ipv4 address doesn't change when a EC2 is stopped but public ip
 
 ![](images/security-group-refering.png)
 
-
 - SSH
-ssh -i EC2Tutotial.pem ec2-user@35.180.140.144
+chmod 0400 EC2Test.pem
+ssh -i EC2Test.pem ec2-user@44.204.172.204
 
 ### EC2 Purchasing Options
 - On demand: Short workload, predectible pricing
@@ -229,7 +229,15 @@ ssh -i EC2Tutotial.pem ec2-user@35.180.140.144
   - Purchasing options: no upfront | partial upfront = + | All upfront = +++
   - Reserve a specific instance type
   - Recomended for staedy-stage usage applications
-- Spot Instances: Short workload, cheap, can lose instance
+  - Convertible Reserved Instance. 66% discount.
+- **Saving Plans** 
+  - Get a discount based on long-term usage (up to 72%)
+  - Commit to a certain type of usage ($10/hour for 1 o 3 years)
+  - Flexible across
+    - Instance Size (m5.xlarge, m5.2xlarge)
+    - OS (Linux, Windows)
+    - Tenancy (Host, Dedicated, Default)
+- **Spot Instances**: Short workload, cheap, can lose instance
   - Can get a discount of up to 90% compared to on-demand
   - Instances tha you can lose at any point of time if your max price is less than the current spot price
   - The most cost-efficient instances in AWS.
@@ -240,10 +248,15 @@ ssh -i EC2Tutotial.pem ec2-user@35.180.140.144
     - Any distributed workloads
     - Workloads with a flexible start and end time
   - No suitable for critical job or databases
-- EC2 Dedicated Host: Book an entire physical server.
+- **EC2 Dedicated Host**: Book an entire physical server.
   - Allocated for your account for a 3-yeas period reservation
-  - More expensive
-- EC2 Dedicated instances
+  - The most expensive
+- **EC2 Dedicated instances**
+- EC2 Capacity Reservacion
+  - Reserve **OnDemand** instances capacity in a separete AZ for any duration
+  - You always have access to EC2 capacity when you need it
+  - No commitment
+  - _Suitable for short-term. uninterrupted workloads that needs to be in a specif AZ_
   
 ### EBS - Elastic Block Store
 - It allows your instance to persist data, event after their termination
