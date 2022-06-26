@@ -113,7 +113,7 @@ We can assign roles to services using IAM Role
 - Never share IAM users & access keys
 
 
-### EC2: Elastic Computing Cloud
+## EC2: Elastic Computing Cloud
 - Capabilities
     - Rent EC2
     - Storage EBS
@@ -215,7 +215,7 @@ Note: Th private Ipv4 address doesn't change when a EC2 is stopped but public ip
 chmod 0400 EC2Test.pem
 ssh -i EC2Test.pem ec2-user@44.204.172.204
 
-### EC2 Purchasing Options
+#### EC2 Purchasing Options
 - On demand: Short workload, predectible pricing
     - Pay per use
       - Linux or Windows - billing per second, after the first minute.
@@ -258,7 +258,7 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
   - No commitment
   - _Suitable for short-term. uninterrupted workloads that needs to be in a specif AZ_
   
-### EBS - Elastic Block Store
+## 6 - EBS - Elastic Block Store
 - It allows your instance to persist data, event after their termination
 - They can only be mounted to one instance at a time (at the CCP level)
 - They are bound to a specific availability zone
@@ -273,9 +273,16 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
 ![](images/ebs-volume.png)
 
 ### EBS Snapshots
-- Make a backup (snapshot) of your ESB volume at a point in time
+- Make a backup (snapshot) of your ESB volume at any point at time
+- Not necessary to detach volumen to do snapshot, but recommended
 - Can copy snapshots across AZ or Region
-
+- **EBS Snapshot Archive**
+  - Move a Snapshot to an "Archive tier" that is 75% cheaper
+  - Takes within 24 to 72 hours for restoring the archive.
+- **Recycle Bin for EBS Snapshots**
+  - Setup rules to retain deleted snapshots so you can recover them after an accidental deletion
+  - Specify retentions (from 1 day to 1 year)
+- **EBS Snapshot Hang-on**
 ![](images/ebs-snapshot.png)
 
 ### AMI 
@@ -294,6 +301,9 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
   
 ![](images/ebs-ami.png)
 
+- **AMI Hang-on**
+
+
 ### EC2 Instance Store
 - EBS volumes are networks drives with good but "limited" performance
 - **If you need a high performance hardware disk, use EC2 instance store**
@@ -304,18 +314,32 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
 - Backups and Replications are your responsability
 
 ### EBS Volume Type
-- Gneral Purpose SDD. gp2 / gp3 (SD)
-  - Cost effective storage, low-latency
-- Provisioned IOPS. io 1 / io 2 (SD)
+- **gp2 / gp3 (SD)**: General Purpose SSD Volume that balances price and performance for wide variaty of workloads.
+  - Cost effective storage
+  - System boot volumes,
+  - gp3: New version
+    - Can increase IOPS up to 16000 and throughput up to 1000 MiB/s _independently_
+  - gp3: Olders
+    - Size of volume and IOPS are _liked_
+- **io1 / io2 (SD)**: Provisioned IOPS. Highest performance SSd volume for mission critical low-latency or high-throughput workloads.
+  - Provisioned IOPS.
   - Critical business applications with sustained IOPS performance
   - Or applications that need more than 16000 IOPS
   - Great for databases workloads
-  - Supports EBS Multi attach
+  - Can increase PIOPS indenpendently
+  - io1/io2 (4GiB - 16TiB)
+    - Max PIOPS: 64000 for Nitro EC2 instances & 32000 for other.
+  - io2 Block Express
+  - Supports EBS Multi attach (only for io1/io2 family)
     - **Attach the same ESB volume to multiple EC2 instance in the same AZ**
-- Hard Disck Drive
+- **st1 (HDD)**: Low cost HDD volume designed for frequently accessed, throughput-intensive workloads.
   - Cannot be a boot volume
   - Throughput Optimized HDD. St 1 (HDD)
-  - Cold. Sc 1 (HDD)
+- **Sc 1 (HDD)**: Lowcost HDD volume designed for less frecuently accessed workloads.
+  - For data that is infrequently accessed.
+
+
+> Only gp2/gp3 andio1/io2 can be used as boot volumes
 
 https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 
