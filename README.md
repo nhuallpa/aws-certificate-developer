@@ -287,8 +287,8 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
 
 ### AMI 
 - AMI = Amazon Machine Image
-- AMi are a customization of and EC2 instance
-- AMi are built for a specific region
+- AMI are a customization of and EC2 instance
+- AMI are built for a specific Region
 - You can launch EC2 instance from
   - A Public AMI
   - Your own AMI
@@ -354,10 +354,10 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - Use cases:  content managegment, web serving, data sharing, wordpress
 - Uses NFSv1.1 protocol
 - Uses security group to control access to EFS
-- Compatible with Linux based AMI
+- _Compatible with Linux based AMI_
 - Encryption at rest using KMS
 - POSIX file system that has a standard file API
-- File system scale automatically, pay per use, no capacity planning.
+- File system scale automatically, _pay per use_, no capacity planning.
 
 ### EFS Performance & Storage Classess
 - EFS Scale
@@ -370,8 +370,14 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
   - Bursting
   - Provisioned
 - Storage Tiers
-  - Standard
-  - Infrequent access
+  - Standard: For frequently accessed files.
+  - Infrequent access (EFS-AI): cost to retrieve files, lower price to store. Enable EFS-IA with a lifecycle policy.
+- Availability and Durability
+  - Regional: Multi-AZ, great for PROD
+  - One Zone: One AZ, great for dev, backup enabled.
+- Over 90% in cost savings
+
+![](images/efs-tier.png)
 
 
 ---
@@ -522,6 +528,40 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - After a scaling activity happens, you are in the cooldown period (default 300 seconds)
     - During the cooldown period, the ASG will not launch or terminate additional instances
     - Advice: Use a ready to use AMI to reduce configuration time.
+
+
+## 09 - Route 53
+
+- Define Records
+  - name
+  - Type
+    - A: map a hostname to IPv4
+    - AAAA: maps a hostname to IPv6
+    - CNAME: maps a hostname to another hostname
+    - NS: Name servers for the Hosted Zone
+  - Value
+  - Routing Policy
+  - TTL
+
+- Hosted Zones
+  - A container for records that define how to route traffic to a domain and its subdomains
+  - Public Hosted Zones and Private Hosted Zones
+  - Cost: $0,5 per month per hosted zone
+  - Cost new Domain: $12 dollar / year
+
+- Record examples
+  - record name: test.stephane.com
+  - Type: A
+  - Value: 11.22.33.44
+  - TTL: 300
+  - Routing policy: Simple
+
+
+- Utilities
+
+    sudo yum install -y bind-utils
+    nslookup test.stephane.com
+    dig test.stephane.com
 
 
 
