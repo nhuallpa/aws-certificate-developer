@@ -582,8 +582,11 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
   - Monitor CouldWatch Alarm
 
 - Routing Policy
-  - 
-
+  - Failover (Active-Passive): Route53 points to a primary and a secondary resource
+  - Geolocation: This is vase on user location. There is Default Region.
+  - Geoproximity: Route traffic to your resources based on the geographic location of users and resources.
+  - IP-based Routing: Routing is based on clients' IP address
+  - Multi-Value: Routing traffic to multiple resources. R53 Returns multiple value and it can be associated with health cheker.
 
 ---
 ## 19 - AWs Monitoring
