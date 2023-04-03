@@ -556,15 +556,33 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
   - TTL: 300
   - Routing policy: Simple
 
-
 - Utilities
-
     sudo yum install -y bind-utils
     nslookup test.stephane.com
     dig test.stephane.com
 
+- TTL
+  - Client caches the result base on ttl
+  - The idea is reduce the ammount of interaction to Route53
 
+- CNAME vs Alias
+  - CNAME: Points a hostname to any otherhostname. ONLY FOR NON ROOT DOMAIN
+  - Alias: Points a hostname to an AWS Resource. Both NON ROOT DOMAIN and ROOT DOMAIN. Free charge.
+    - Targets: ELB, CFD, APIG, EB, S3 websites, VPC, GAA, R53
+    - Not for EC2 DNS name
 
+- Routing Policy
+  - Simple: Single resource or multiple resource
+  - Weighted: Control the % of the requestins that go to each specific resource
+  - Latency: Redirect to the resource that has the least latency close to us. Latency is based on traffic between users and AWS Regions.
+
+- Health Check
+  - Monitor an Enpoint: Application, server, AWS Resource
+  - Monitor other Health Cheks: Combine Heath chekers
+  - Monitor CouldWatch Alarm
+
+- Routing Policy
+  - 
 
 
 ---
