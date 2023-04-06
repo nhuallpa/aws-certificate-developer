@@ -529,6 +529,35 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - During the cooldown period, the ASG will not launch or terminate additional instances
     - Advice: Use a ready to use AMI to reduce configuration time.
 
+## 09 - RDS
+  - It is a managed service but you can't SSH into your instances.
+  - Storage Auto Scaling
+    - When RDS detects you are running out of free database storage, it scale automatically.
+    - Maximun Storage Thereshold parameter
+    - Use Case: Unpredictable workloads.
+    - Support MariaDB, MySQL, PostgreSQL, SQL Server, Oracle.
+  - Read Replicas
+    - Up to 15 read replicas.
+    - Within AZ, Cross AZ or Cross Region.
+    - Replication is ASYNC (Reads are eventually consistent)
+    - In the same region, you don't pay a fee. Otherwise, in different region, there is a fee.
+  - Multi AZ (Disaster Recovery)
+    - SYNC replication
+    - One DNS name - automatic app failover to standby
+    - Increase availability
+    - No manual intervation in apps
+    - Not used for scaling
+    - Note: The read replicas be setup as Multi AZ for disaster Recovery (DR)
+  - Move from Single-AZ to Multi-AZ
+    - Zero downtime operation
+    - Just click on "modify" for DB
+    - Internally:
+      - A Snapshot is taken
+      - A new DB is restored from the snapshot to a new AZ
+      - Synchronization is stablished between the two databases.
+
+
+
 
 ## 09 - Route 53
 
@@ -587,6 +616,38 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
   - Geoproximity: Route traffic to your resources based on the geographic location of users and resources.
   - IP-based Routing: Routing is based on clients' IP address
   - Multi-Value: Routing traffic to multiple resources. R53 Returns multiple value and it can be associated with health cheker.
+
+
+## 10 - VPC Fundamentals
+
+- VPC: Virtual Private Cloud (Regional resource)
+- Subnets: Partition your network inside a VPC (Availability Zone resource)
+- Public subnet
+- Private subnet
+- Route Tables: Define access to internet and between subnets.
+- Internet Gateway & NAT Gateway
+  - Internet Gateway helps our VPC instances connect with internet
+  - NAT Gateway & NAT Instances: Allow your instances in your Private subnet to access the internet while remaining private. It is created in a Public Subnet to connect to Internet Gateway.
+- Network ACL
+  - A firewall which controls traffic from an to subnet.
+- Security Group
+  - A firewall that controls traffic to and from an ENI / an EC2 instance
+  - Rules include IP address and other security groups
+- VPC Flow Logs
+  - Capture information about IP traffic going into your interfase
+  - Helps to monitor  
+- VPC Peering
+  - Connect two VPC, privately using AWS network
+  - Must not have overlapping CIDR
+  - Not transitive
+- VPC Endpoints
+  - Endpoints allow you to connect to AWS Services usring a private network instead of the public.
+  - This gives you enhanced security and lower latency to access AWS services.
+- Site to Site VPN: Connect an on-premises VPN to AWS. It can not connect VPC endpoints
+- Direct Connect (DX) : Establish a physical and private connection between on-premises and AWS. It can not connect VPC endpoints
+- Example: https://aws.amazon.com/es/blogs/architecture/wordpress-best-practices-on-aws/
+
+
 
 ---
 ## 19 - AWs Monitoring
