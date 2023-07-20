@@ -557,7 +557,93 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
       - Synchronization is stablished between the two databases.
 
 
+- Aurora
+  - High Availability and Read Scaling
+    - 6 copies of your data across 3 AZ.
+    - Cross Region Replication
+  - Cluster
+    - Writer Endpoint -> One Master
+    - Reader Endpoint -> Up to 15 read replicas
+  - Feature
+    - Automatic Fail-Over
+    - Backup and Recovery
+    - isolation and Security
+    - Industry compliance
+    - Push-Button scaling
+    - Automated Patching with Zero Downtime
+    - Advanced Monitoring
+    - Routine Maintenance
+    - Backtrack: Restore data
 
+- RDS & Aurora Security
+  - At-rest encription
+    - Encriptions shoud be define as launch time
+    - To encrypt an un-encrypted DB, restore a Snapshot as encrypted
+  - In-flight encryption: Use AWS TLS root certificaes
+  - IAM: Roles instead of user/pw
+  - Security Group: Control network access
+  - No SSH: except RDS custom
+  - Audit Logs: sent to CloudWatch logs
+
+- RDS Proxy
+  - Allows apps to pool and share DB connections
+  - Reducing the stress on database
+  - Reduced RDS and Aurora failover time by up 66%
+  - Enforce IAM for DB and securely store in AWS sercret Manager
+
+- Amazon ElastiCache Overview
+  - REDIS
+    - Multi AZ
+    - Read Replicas to scale reads and have high availability
+    - Data Durability using AOF persistence
+    - Backup and restore features
+    - Support Sets and Sorted Sorted Sets
+  - MEMCACHED
+    - Multi-node for partitioning of data
+    - No high availability 
+    - No persistent
+    - No backup and restore
+    - Multi-threaded architecture
+  - Hand-on
+    - Disable clusted mode for Free
+    - Disable Multi-AZ for Free
+    - Node type: cache.t2.micro
+    - Number of replica: 0
+    - Subnet: my-fist-subnet-group
+    - Disable Backups
+    - Create Button
+    - You will have a primary endpoint and reader endpoint
+  - Strategies
+    - **Lazy Loading / Cache-Aside / Lazy Population**:
+      - Fisrt, Look at the cache for a cache hit.
+      - In case a cache miss, then read from DB and finally Write to cache (three access penalty)
+      - Pros:
+        - Only requested data is cached
+        - Node failures are not fatal
+      - Cons:
+        - Cache miss penalty that results in 3 round trips
+        - Stale Data: Data can be updated in the database and outdated in the cache.
+    - **Write Through**
+      - First cache hit.
+      - Then, there is a write to DB and then Write to cache
+      - Pros:
+        - Data in cache is never stale, reads are quick
+        - Write penalty vs Read penalty.
+      - Cons 
+        - Missing Data until it is added / updated in the DB. We can combine this with Lazy Loading.
+        - Cache churn  - Most data is never read, which is a waste of resource. Adding a TTL you can minimiza wasted space.
+    - Cache Evictions and Time-to-live
+      - Three ways:
+        - delete the tiem explicitly
+        - Item is evicted because the memory is full (LRU)
+        - Set a TTL from few seconds to hours or days
+    - MemoryDB for Redis
+      - Redis compatibility,**durable, in memory database service**
+      - **Ultra-fast performance with over 160 millions request/seconds**
+      - Durable in-momory data store with multi-AZ transactional log.
+      - Scale com 10 to 100TB of storage
+      - Use cases: Web and mobile apps, online gamings, media streaming.
+      
 
 ## 09 - Route 53
 
@@ -648,6 +734,85 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - Example: https://aws.amazon.com/es/blogs/architecture/wordpress-best-practices-on-aws/
 
 
+## 11 - S3
+
+### Classes : https://aws.amazon.com/es/s3/storage-classes/
+  - General Purpose
+    - 99,99% Availability
+    - Used for frequently accessed data
+    - Low latency and high throughput
+    - Use case: Big data, mobile $ gaming apps, content distribution.
+  - Standard-Infrequents Access 
+    - 99,9% Availability
+    - Use cases: Disaster Recovery, backups
+  - One Zone-Infrequents Access
+    - High durability in a single AZ
+    - 99,5% Availability
+    - Use cases: Storing secondary backup copies of on-premise data, or data you can recreate.
+  - Glacier: Low-Cost object storage meant for archiving /backup  
+    - Glacier Instant Retrieval
+      - Milisecond retrieval, great for accessed once a quarter
+      - Minimum Storage duration of 90 days
+    - Glacier Flexible Retrieval
+      - Expedited (1 to 5 minutes), Standard (3 to 5 hours), bulk (5 to 12 hours)
+      - Minimum storage duration of 90 days
+    - Glacier Deep Archive - for long term storage
+      - Standard (12 hours), Bulk (48 hours)
+      - Minimum storage duration of 180 days.
+  - Intelligent Tiering
+    - Small monthly monitoring and auto-tiering fee
+    - Moves objects automatically between Access Tiers base on usage.
+
+
+## 12 - AWS CLI
+
+### Get access token with MFA
+
+```
+aws sts get-session-token --serial-number arn:aws:iam::089639474050:mfa/G22 
+--token-code 610702
+
+aws configure --profile mfa
+
+```
+Then, add aws_session_token variable in  .aws/credentials
+Finally, test it like:
+
+```
+aws configure --profile mfa
+```
+### AWS Limits
+- API Rate Limits
+- Service Quotas
+
+### Exponential backoff
+- This retry mechanism already included in AWS SDL API
+- If you get ThrottlingException intermittently, use exponential backoff
+- Must implement yourself if using the AWS API as-is.
+  - Must only implement the retries on 5xx servers error and trottling
+  - Do not implement on the 4xx client errors.
+
+### AWS CLI Credentials Provider Chain (Order/priority)
+
+1. Command line options - --region, -- output, and --profile
+2. Environment variable - AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN
+3. CLI credentials file - aws configure (.aws/credentials)
+4. CLI configuration file - aws configure (.aws/config)
+5. Container credencials - ECS task
+6. Instance profile credentials - EC2 instace profiles
+
+The Java SDK
+
+1. Java system properties - aws.accessKeyId and aws.secretKey
+2. Environment variable - AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN
+3. CLI credentials file - aws configure (.aws/credentials)
+4. Container credencials - ECS task
+5. Instance profile credentials - EC2 instace profiles
+ 
+### Singing AWS API request
+- When you call the AWS HTTP API, you sing the request.
+- Is you use the SDK or CLI, the HTTP requests are signed for you
+- In header with Signature or in query param with X-Amz-Signature
 
 ---
 ## 19 - AWs Monitoring
@@ -667,7 +832,15 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - It uses the same service API and endpoint, and the same underlying service infrastructure
 - EventBridge allows extension to add event buses for your custom applications and your thrid-party SaaS apps
 - Event Bridge has the Schema Registry capability
-  
+
+
+#### Durability
+  - High durability (11 9's)
+  - If you store 10,000 objects with Amazon S3, you can on average expect to incur a loss of a single object once every 10.00 years
+
+#### Availability
+  - Measures how readily available a service is.
+
 
 
 ---
