@@ -734,34 +734,6 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - Example: https://aws.amazon.com/es/blogs/architecture/wordpress-best-practices-on-aws/
 
 
-## 11 - S3
-
-### Classes : https://aws.amazon.com/es/s3/storage-classes/
-  - General Purpose
-    - 99,99% Availability
-    - Used for frequently accessed data
-    - Low latency and high throughput
-    - Use case: Big data, mobile $ gaming apps, content distribution.
-  - Standard-Infrequents Access 
-    - 99,9% Availability
-    - Use cases: Disaster Recovery, backups
-  - One Zone-Infrequents Access
-    - High durability in a single AZ
-    - 99,5% Availability
-    - Use cases: Storing secondary backup copies of on-premise data, or data you can recreate.
-  - Glacier: Low-Cost object storage meant for archiving /backup  
-    - Glacier Instant Retrieval
-      - Milisecond retrieval, great for accessed once a quarter
-      - Minimum Storage duration of 90 days
-    - Glacier Flexible Retrieval
-      - Expedited (1 to 5 minutes), Standard (3 to 5 hours), bulk (5 to 12 hours)
-      - Minimum storage duration of 90 days
-    - Glacier Deep Archive - for long term storage
-      - Standard (12 hours), Bulk (48 hours)
-      - Minimum storage duration of 180 days.
-  - Intelligent Tiering
-    - Small monthly monitoring and auto-tiering fee
-    - Moves objects automatically between Access Tiers base on usage.
 
 
 ## 12 - AWS CLI
