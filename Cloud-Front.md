@@ -42,3 +42,19 @@
 ### Cache Behaviours
 - Configure different settings for a given URL path pattern.
 - Route to different kind of origins/origin groups based on the content type or path pattern.
+
+### ALB or EC2 as an origin
+1. Look at Public IP of Edge Location: https://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
+2. Allow those IPs in the target group of EC2 instance or the ALB. **These must be public.**
+
+### Geo Restriction
+- You can restrict who can access your distribution
+    - Allowlist: Allow your users to access your content only if they're in one of the countries on a list of approved countries
+    - Blocklist: Prevent your users from accessing your content if they're in one of the countries on a list of banned countries.
+
+### Hang on: CloudFron URL signed
+- Create a private key and a public key based on RSA 2048 bit 
+- The public key is used by CloudFront to verify URLs
+- The private key is used by your applicatioins (e.g. EC2) to sign URLs
+- Load the public key in Public Key Manu.
+- Then create a Key Group and choose the public key loaded.
