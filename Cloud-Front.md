@@ -58,3 +58,13 @@
 - The private key is used by your applicatioins (e.g. EC2) to sign URLs
 - Load the public key in Public Key Manu.
 - Then create a Key Group and choose the public key loaded.
+
+### Advanced Concepts
+- Diferent class for pricing
+- Multiple origin
+- Origin groups
+- Field Level Encryption
+
+### Real Time Logs
+- Users -> ClouldFront -> Kinesis Data Streams -> Lambda (Real-time Processing)
+- Users -> ClouldFront -> Kinesis Data Streams -> Kinesis Data Firehose (Near real-time)

@@ -207,7 +207,7 @@ Note: Th private Ipv4 address doesn't change when a EC2 is stopped but public ip
   - 22 = SFTP
   - 80 = HTTP
   - 443 = HTTPS
-  - 3389 = RDP
+  - 3389 = RDP : remote destop 
 
 ![](images/security-group-refering.png)
 
@@ -216,19 +216,19 @@ chmod 0400 EC2Test.pem
 ssh -i EC2Test.pem ec2-user@44.204.172.204
 
 #### EC2 Purchasing Options
-- On demand: Short workload, predectible pricing
+- **On demand**: Short workload, predectible pricing
     - Pay per use
       - Linux or Windows - billing per second, after the first minute.
       - All other operating System - billing per hour
     - Has the highest cost but no upfront payment
     - No long-term commitment.
     - Recomended for short-term and un-interrupted workload, where you can't predict how the application will behave
-- Reserved: (Minimun 1 year)
-  - Up to 75% discount compared to On-demand
+- **Reserved instance**: (Minimun 1 year)
+  - Up to 72% discount compared to On-demand
   - Reservations Period: 1 year = + discount | 3years = +++ discount
   - Purchasing options: no upfront | partial upfront = + | All upfront = +++
   - Reserve a specific instance type
-  - Recomended for staedy-stage usage applications
+  - Recomended for staedy-stage usage applications (Databases)
   - Convertible Reserved Instance. 66% discount.
 - **Saving Plans** 
   - Get a discount based on long-term usage (up to 72%)
@@ -250,14 +250,32 @@ ssh -i EC2Test.pem ec2-user@44.204.172.204
   - No suitable for critical job or databases
 - **EC2 Dedicated Host**: Book an entire physical server.
   - Allocated for your account for a 3-yeas period reservation
+  - Purchasing Options
+    - On-demand - Pay per second for active Dedicated Host
+    - Reserved - 1 or 3 years
   - The most expensive
 - **EC2 Dedicated instances**
-- EC2 Capacity Reservacion
+  - Instance run on hardware that's dedicated to you
+  - May share hardware with other instances in same account
+  - No control over instance placement.
+- **EC2 Capacity Reservacion**
   - Reserve **OnDemand** instances capacity in a separete AZ for any duration
   - You always have access to EC2 capacity when you need it
-  - No commitment
+  - **No time commitment, No billing discounts**
   - _Suitable for short-term. uninterrupted workloads that needs to be in a specif AZ_
-  
+- **Share Responsibility Model for EC2**
+  - AWS
+    - Insfractructure
+    - Isolation on physical hosts
+    - Replacement faulty hardware
+    - Compliance validation
+  - User
+    - Security Groups rules
+    - Operating-System patches and updates
+    - Software and utilities installed on the EC2 instance
+    - IAM Roles assigned to EC2 & IAM user access management
+    - Data Security on your instace
+
 ## 6 - EBS - Elastic Block Store
 - It allows your instance to persist data, event after their termination
 - They can only be mounted to one instance at a time (at the CCP level)
