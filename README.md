@@ -135,10 +135,17 @@ We can assign roles to services using IAM Role
 
 ``` bash
 #!/bin/bash
-yum update -y
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
+set -euxo pipefail
+
+if command -v dnf >/dev/null 2>&1; then
+	dnf -y update
+	dnf -y install httpd
+else
+	yum -y update
+	yum -y install httpd
+fi
+
+systemctl enable --now httpd
 echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
 ```
 
@@ -449,6 +456,7 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - EC2 instances
     - IP Address - mus be private IP
     - Application Load Balancer
+    - Helth checks supports TCP, HTTP AND HTTPS protocol
 
 - **Gateway Load Balancer (GLB)**
   - Deploy, scale, and manage a fleet of 3rd party network virtual appliances in AWS. Example: Firewall, instrusion detection and Prevention Systems, Deep Packet Inspection System, payload manipulation.
@@ -472,14 +480,24 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - AWSALBTG
   - Two type of Cookies
     - Applications-based Cookies
+      - Custom cookie
+      - Application cookie
     - Durations-based Cookies
+  - Hand-on: Target Group -> Target Selection Configuration -> Stickiness Flag -> duration, unit of time and, name (custom)
 
 - **Cross-Zone Load Balancing**
   - Each load balancer instance distribures evenly across all registered instances in all AZ.
   - Without Cross Zone Load Balancing, request are distributed in the instances of the node of the Elastic Load Balancer.
+  - **Application Load Balancer**
+    - Enable by Default
+    - No charges for inter AZ data
+  - **Network Load Balancer**
+    - Disable By default
+    - Pay charges for inter AZ data is enabled
+  
   
 - **SSL Certificates**
-  - SSL Certificate allow traffic between your clients and your load balancer
+  - SSL Certificate allow traffic between your clients and your load balancer to be encrypted in transit (in-flight encryption)
   - SSL: Secure Socket Layer
   - TLS: Transport Layer Security. Newer version
   - TLS certificates are main used
@@ -492,9 +510,9 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - Http Listener
   - Specify a default certificate
   - Optional list of certs to support multiple domains.
-  - Clients can use SNI (Server Name Indication)
+  - **Clients can use SNI (Server Name Indication)**
   - Ability to specify a security policy
-- Server Name Indicator
+- Server Name Indicator (SNI)
   - SNI solve the problem of loading multiple SSL certificates onto one web server (To serve multiple websites)
   - Require the client to indicate the hostname of the target server in the initial SSL handshake
   - The server will then find the correct certificate, or return the default one.
@@ -509,19 +527,29 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
 - **Network Load Balancer (v2)**
   - Supports multiple listeners with multiple SSL certificates
   - Uses Server Name Indication (SNI) to make it work 
+- Hand on:
+  1. Add Listener
+  2. Prtotocol: Https, 443
+  3. Default action: Forward and set the target group ALB
+  4. Default SSL/TLE certificate: Import to ACM: Copy and paste
+
 
 - **Connection Draining**
   - Feature naming
     - Connection Draining - for CLB
     - Deregistration Delay - for ALB & NLB
-  - Time to complete "in-flight requests" while the instance is deregistering or unhealthy
+  - Time to complete "in-flight requests" while the **instance is deregistering or unhealthy**
   - Stop sending new request to the EC2 instance with is de-registering.
+  - Parameters:
+    - between 1 to 3600 seconds (default 300sec)
+    - Can be disabled
+    - Set to a low value if your requests are short (30 sec)
 
 ![](images/draining.png)
 
 - **Auto Scaling Group**
-  -  Scale out
-  -  Scale in
+  -  Scale out: Add instances
+  -  Scale in: Remove instances
   -  Ensure we have a minimum and a maximun number of machines running
   -  Automatically register new instances to a load balancer
   -  **Auto scaling Alarm**
@@ -532,20 +560,31 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
      -  Number of request on the ELB per instance
      -  Average Network In
      -  Average Network Out
+  - Hand-on Create ASG
+    - Create EC2 template
+    - Integrate Load Balancer
+    - Attach to Target Group
+    - Allow Ec2 and LB health check
+    - No policy, no capacity setting
+    - Launch a look at Instance Management
 - **Auto Scaling Group - Dynamic Scaling Policies**
   - Target Tracking Scaling
   - Simple / Step Scaling
-  - Scheduled Actions
+  - Scheduled Actions: Increase the min capacity in a period of time
   - Predictive Scaling: Continuously forescast load and schedule scaling ahead
   - Good metrics to scale on
     - CPU Utilization
-    - Request Count Per Target
+    - Request Count Per Target: Make sure number of request per EC2 is stable
     - Average Network In/Out
     - Any custom metric
   - Scaling Cooldowns
     - After a scaling activity happens, you are in the cooldown period (default 300 seconds)
-    - During the cooldown period, the ASG will not launch or terminate additional instances
+    - During the cooldown period, the ASG will not launch or terminate additional instances (TO ALLOW FOR METRICS TO STABILIZE)
     - Advice: Use a ready to use AMI to reduce configuration time.
+
+- **Auto Scaling Group - Instance Refresh**
+  - Update launch template and then RE-CREATE all EC2 instance
+
 
 ## 09 - RDS
   - It is a managed service but you can't SSH into your instances.
@@ -581,6 +620,8 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - Cross Region Replication
   - Cluster
     - Writer Endpoint -> One Master
+      - One Aurora instance takes writes (Master)
+      - Automated failover for master in less than 30 seconds
     - Reader Endpoint -> Up to 15 read replicas
   - Feature
     - Automatic Fail-Over
@@ -598,29 +639,38 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     - Encriptions shoud be define as launch time
     - To encrypt an un-encrypted DB, restore a Snapshot as encrypted
   - In-flight encryption: Use AWS TLS root certificaes
-  - IAM: Roles instead of user/pw
+  - IAM: Use IAM Roles to connect to DB instead of user/pw
   - Security Group: Control network access
   - No SSH: except RDS custom
   - Audit Logs: sent to CloudWatch logs
 
 - RDS Proxy
+  - Fully managed DB proxy for RDS
   - Allows apps to pool and share DB connections
-  - Reducing the stress on database
+  - **Improving DB efficiency by reducing the stress on database resources(CPU, RAM) and minimize open connection and timeouts**. Reducing the stress on database
+  - Serverless, autoscaling, highly available
   - Reduced RDS and Aurora failover time by up 66%
+  - Supports RDS and Aurora
+  - No code changes required for most apps
   - Enforce IAM for DB and securely store in AWS sercret Manager
+  - RDS Proxy is never publicly accessible (Must be access from a VPC)
+
+
 
 - Amazon ElastiCache Overview
+  - Is to get magnaged Redis or Memcached
+  - Helps reduce load off of databases for read intensive workloads.
   - REDIS
-    - Multi AZ
+    - **Multi AZ** with Auto-Failonver
     - Read Replicas to scale reads and have high availability
     - Data Durability using AOF persistence
     - Backup and restore features
-    - Support Sets and Sorted Sorted Sets
+    - **Support Sets and Sorted Sorted Sets**
   - MEMCACHED
     - Multi-node for partitioning of data
     - No high availability 
-    - No persistent
-    - No backup and restore
+    - **No persistent**
+    - **No backup and restore**
     - Multi-threaded architecture
   - Hand-on
     - Disable clusted mode for Free
@@ -650,11 +700,11 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
       - Cons 
         - Missing Data until it is added / updated in the DB. We can combine this with Lazy Loading.
         - Cache churn  - Most data is never read, which is a waste of resource. Adding a TTL you can minimiza wasted space.
-    - Cache Evictions and Time-to-live
+    - **Cache Evictions and Time-to-live**
       - Three ways:
         - delete the tiem explicitly
-        - Item is evicted because the memory is full (LRU)
-        - Set a TTL from few seconds to hours or days
+        - Item is evicted because the memory is full (LRU) -> consider scale up
+        - Set a TTL from few seconds to hours or days. Userful for __Write Through__
     - MemoryDB for Redis
       - Redis compatibility,**durable, in memory database service**
       - **Ultra-fast performance with over 160 millions request/seconds**
@@ -664,7 +714,8 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
       
 
 ## 09 - Route 53
-
+- Domain Register: Amazon Route 53, GoDaddy
+- TLD(top level domain), SLD(second level domain)
 - Define Records
   - name
   - Type
@@ -676,9 +727,17 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
   - Routing Policy
   - TTL
 
+- Hand-on
+  - Domains - Registered Domains - Enter domain name with autorenew (13usd)
+  - Register contact and turn on privicy condition - Then default record created
+  - Create record test.mydomain.com to an static IP 
+  - Install nslookup dig command by 'sudo yum install -y bind-utils'. 
+  - Then nslookup test.mydomain.com && dig test.mydomain.com
+
 - Hosted Zones
   - A container for records that define how to route traffic to a domain and its subdomains
-  - Public Hosted Zones and Private Hosted Zones
+  - Public Hosted Zones : contains records that specify how to route traffic on the Internet (public domain names)
+  - Private Hosted Zones: contains records that specify how to route traffic WITHIN  one or more VPCs (private domain names)
   - Cost: $0,5 per month per hosted zone
   - Cost new Domain: $12 dollar / year
 
@@ -694,7 +753,9 @@ https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html
     nslookup test.stephane.com
     dig test.stephane.com
 
-- TTL
+- TTL cache in local computers
+  - High TTL: 24hs
+  - Low TTL: 60 sec (Cost)
   - Client caches the result base on ttl
   - The idea is reduce the ammount of interaction to Route53
 
